@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,5 +29,16 @@ public static class AssemblyConfigurator
         });
         
         return services;
+    }
+
+    public static async Task ActualizeMigrationsAsync(this IServiceProvider services)
+    {
+        using var scope = services.CreateScope();
+        await using var dbContext = scope.ServiceProvider.GetRequiredService<ShopDbContext>();
+
+        if ((await dbContext.Database.GetPendingMigrationsAsync()).Any())
+        {
+            await dbContext.Database.MigrateAsync();
+        }
     }
 }

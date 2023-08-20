@@ -16,6 +16,8 @@ builder.Services
 
 var app = builder.Build();
 
+await app.Services.ActualizeMigrationsAsync();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
