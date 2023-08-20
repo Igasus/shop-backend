@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Shop.Application.Dto;
 
-namespace Shop.Application.Contracts.Services;
+namespace Shop.Application.Contracts.Aggregates;
 
-public interface IOrderService
+public interface IOrderAggregate
 {
     Task<IList<OrderDto>> GetAllAsync();
     Task<OrderDto> GetByIdAsync(Guid id);

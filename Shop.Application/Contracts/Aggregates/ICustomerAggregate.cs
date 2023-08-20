@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Shop.Application.Dto;
 
-namespace Shop.Application.Contracts.Services;
+namespace Shop.Application.Contracts.Aggregates;
 
-public interface ICustomerService
+public interface ICustomerAggregate
 {
     Task<IList<CustomerDto>> GetAllAsync();
     Task<CustomerDto> CreateAsync(CustomerDtoInput input);

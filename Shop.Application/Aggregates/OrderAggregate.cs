@@ -1,19 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Shop.Application.Contracts.Aggregates;
 using Shop.Application.Contracts.DataSources;
 using Shop.Application.Contracts.Repositories;
-using Shop.Application.Contracts.Services;
 using Shop.Application.Dto;
 
-namespace Shop.Application.Services;
+namespace Shop.Application.Aggregates;
 
-public class OrderService : IOrderService
+public class OrderAggregate : IOrderAggregate
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IOrderDataSource _orderDataSource;
 
-    public OrderService(IOrderRepository orderRepository, IOrderDataSource orderDataSource)
+    public OrderAggregate(IOrderRepository orderRepository, IOrderDataSource orderDataSource)
     {
         _orderRepository = orderRepository;
         _orderDataSource = orderDataSource;

@@ -1,20 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using Shop.Application.Contracts.Aggregates;
 using Shop.Application.Contracts.DataSources;
 using Shop.Application.Contracts.Repositories;
-using Shop.Application.Contracts.Services;
 using Shop.Application.Dto;
 
-namespace Shop.Application.Services;
+namespace Shop.Application.Aggregates;
 
-public class CustomerService : ICustomerService
+public class CustomerAggregate : ICustomerAggregate
 {
     private readonly ICustomerRepository _customerRepository;
     private readonly ICustomerDataSource _customerDataSource;
 
-    public CustomerService(ICustomerRepository customerRepository, ICustomerDataSource customerDataSource)
+    public CustomerAggregate(ICustomerRepository customerRepository, ICustomerDataSource customerDataSource)
     {
         _customerRepository = customerRepository;
         _customerDataSource = customerDataSource;
