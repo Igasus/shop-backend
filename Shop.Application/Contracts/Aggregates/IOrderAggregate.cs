@@ -9,5 +9,5 @@ public interface IOrderAggregate
 {
     Task<IList<OrderDto>> GetAllAsync();
     Task<OrderDto> GetByIdAsync(Guid id);
-    Task<OrderDto> CreateAsync(OrderDtoInput input);
+    Task<Guid> CreateAsync(OrderDtoInput input);
 }

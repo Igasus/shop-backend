@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -8,6 +9,7 @@ using Shop.Application.Contracts.DataSources;
 using Shop.Application.Contracts.Repositories;
 using Shop.Application.Dto;
 using Shop.Domain.Entities;
+using Shop.Domain.Exceptions;
 
 namespace Shop.Application.Aggregates;
 
@@ -36,15 +38,27 @@ public class CustomerAggregate : ICustomerAggregate
         return customers;
     }
 
-    public async Task<CustomerDto> CreateAsync(CustomerDtoInput input)
+    public async Task<CustomerDto> GetByIdAsync(Guid id)
+    {
+        var customer = await _customerDataSource.Customers
+            .ProjectTo<CustomerDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (customer is null)
+        {
+            throw new NotFoundException(ErrorMessages.NotFound((Customer c) => c.Id, id));
+        }
+
+        return customer;
+    }
+
+    public async Task<Guid> CreateAsync(CustomerDtoInput input)
     {
         var customer = _mapper.Map<Customer>(input);
 
         await _customerRepository.Customers.AddAsync(customer);
         await _customerRepository.Context.SaveChangesAsync();
 
-        var createdCustomerDto = _mapper.Map<CustomerDto>(customer);
-
-        return createdCustomerDto;
+        return customer.Id;
     }
 }

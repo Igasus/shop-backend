@@ -49,15 +49,13 @@ public class OrderAggregate : IOrderAggregate
         return order;
     }
 
-    public async Task<OrderDto> CreateAsync(OrderDtoInput input)
+    public async Task<Guid> CreateAsync(OrderDtoInput input)
     {
         var order = _mapper.Map<Order>(input);
 
         await _orderRepository.Orders.AddAsync(order);
         await _orderRepository.Context.SaveChangesAsync();
 
-        var createdOrderDto = _mapper.Map<OrderDto>(order);
-
-        return createdOrderDto;
+        return order.Id;
     }
 }

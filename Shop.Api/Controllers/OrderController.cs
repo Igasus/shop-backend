@@ -4,7 +4,9 @@ using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Shop.Application.Contracts.Aggregates;
 using Shop.Application.Dto;
+using Shop.Domain.Exceptions;
 
 namespace Shop.Api.Controllers;
 
@@ -13,15 +15,24 @@ namespace Shop.Api.Controllers;
 [Route("api/orders")]
 public class OrderController : ControllerBase
 {
+    private readonly IOrderAggregate _orderAggregate;
+
+    public OrderController(IOrderAggregate orderAggregate)
+    {
+        _orderAggregate = orderAggregate;
+    }
+
     /// <summary>
     /// Get all Orders.
     /// </summary>
     /// <returns>ActionResult with List of Orders.</returns>
     [HttpGet]
     [ProducesResponseType(typeof(IList<OrderDto>), StatusCodes.Status200OK)]
-    public Task<IActionResult> GetAllAsync()
+    public async Task<IActionResult> GetAllAsync()
     {
-        throw new NotImplementedException();
+        var orders = await _orderAggregate.GetAllAsync();
+
+        return Ok(orders);
     }
 
     /// <summary>
@@ -29,11 +40,14 @@ public class OrderController : ControllerBase
     /// </summary>
     /// <param name="orderId">Id of Order.</param>
     /// <returns>ActionResult with Order.</returns>
+    /// <exception cref="NotFoundException">Order with specified Id does not exist.</exception>
     [HttpGet("{orderId:guid}")]
     [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
-    public Task<IActionResult> GetByIdAsync([FromRoute] Guid orderId)
+    public async Task<IActionResult> GetByIdAsync([FromRoute] Guid orderId)
     {
-        throw new NotImplementedException();
+        var order = await _orderAggregate.GetByIdAsync(orderId);
+
+        return Ok(order);
     }
 
     /// <summary>
@@ -44,8 +58,11 @@ public class OrderController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public Task<IActionResult> CreateAsync([FromBody] OrderDtoInput input)
+    public async Task<IActionResult> CreateAsync([FromBody] OrderDtoInput input)
     {
-        throw new NotImplementedException();
+        var orderId = await _orderAggregate.CreateAsync(input);
+        var order = await _orderAggregate.GetByIdAsync(orderId);
+
+        return Ok(order);
     }
 }
