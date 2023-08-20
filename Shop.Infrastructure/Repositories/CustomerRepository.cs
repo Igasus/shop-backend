@@ -1,6 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
 using Shop.Application.Contracts.Repositories;
 using Shop.Domain.Entities;
 
@@ -8,18 +6,13 @@ namespace Shop.Infrastructure.Repositories;
 
 public class CustomerRepository : ICustomerRepository
 {
-    public Task<IList<Customer>> GetAllAsync()
+    private readonly ShopDbContext _dbContext;
+
+    public CustomerRepository(ShopDbContext dbContext)
     {
-        throw new NotImplementedException();
+        _dbContext = dbContext;
     }
 
-    public Task<Guid> CreateAsync(Customer input)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task SaveChangesAsync()
-    {
-        throw new NotImplementedException();
-    }
+    public DbSet<Customer> Customers => _dbContext.Customers;
+    public DbContext Context => _dbContext;
 }
