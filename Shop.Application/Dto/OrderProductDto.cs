@@ -1,3 +1,5 @@
+using Shop.Application.Dto.Abstractions;
+
 namespace Shop.Application.Dto;
 
 public record OrderProductDto : EntityDtoBase
