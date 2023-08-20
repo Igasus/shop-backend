@@ -10,6 +10,8 @@ public static class AssemblyConfigurator
     {
         services.AddTransient<ICustomerAggregate, CustomerAggregate>();
         services.AddTransient<IOrderAggregate, OrderAggregate>();
+
+        services.AddAutoMapper(typeof(AssemblyConfigurator).Assembly);
         
         return services;
     }
