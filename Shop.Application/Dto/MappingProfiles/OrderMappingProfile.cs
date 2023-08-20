@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Shop.Domain.Entities;
-using Shop.Domain.OwnedData;
 
 namespace Shop.Application.Dto.MappingProfiles;
 
