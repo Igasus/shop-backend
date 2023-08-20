@@ -12,4 +12,6 @@ public static class ErrorMessages
 
         return message;
     }
+
+    public static string InternalServerError => "Internal Server Error";
 }

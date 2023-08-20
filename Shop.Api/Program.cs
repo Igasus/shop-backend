@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Shop.Api.Middlewares;
 using Shop.Application;
 using Shop.Infrastructure;
 
@@ -16,16 +17,18 @@ builder.Services
 
 var app = builder.Build();
 
-await app.Services.ActualizeMigrationsAsync();
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionHandlerMiddleware>();
+
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
+await app.Services.ActualizeMigrationsAsync();
 
 app.Run();
