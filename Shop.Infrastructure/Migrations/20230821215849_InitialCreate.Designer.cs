@@ -12,7 +12,7 @@ using Shop.Infrastructure;
 namespace Shop.Infrastructure.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    [Migration("20230821095600_InitialCreate")]
+    [Migration("20230821215849_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -114,7 +114,7 @@ namespace Shop.Infrastructure.Migrations
                                 .HasForeignKey("OrderId");
                         });
 
-                    b.OwnsOne("Shop.Domain.Entities.Owned.Discount", "Discount", b1 =>
+                    b.OwnsOne("Shop.Domain.Entities.Owned.Discount", "RequestedDiscount", b1 =>
                         {
                             b1.Property<Guid>("OrderId")
                                 .HasColumnType("uniqueidentifier");
@@ -123,9 +123,26 @@ namespace Shop.Infrastructure.Migrations
                                 .HasPrecision(7, 4)
                                 .HasColumnType("decimal(7,4)");
 
-                            b1.Property<decimal>("Total")
+                            b1.Property<decimal>("Value")
                                 .HasPrecision(14, 4)
                                 .HasColumnType("decimal(14,4)");
+
+                            b1.HasKey("OrderId");
+
+                            b1.ToTable("Orders");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrderId");
+                        });
+
+                    b.OwnsOne("Shop.Domain.Entities.Owned.Discount", "ResultDiscount", b1 =>
+                        {
+                            b1.Property<Guid>("OrderId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<decimal>("Percent")
+                                .HasPrecision(7, 4)
+                                .HasColumnType("decimal(7,4)");
 
                             b1.Property<decimal>("Value")
                                 .HasPrecision(14, 4)
@@ -141,9 +158,11 @@ namespace Shop.Infrastructure.Migrations
 
                     b.Navigation("Customer");
 
-                    b.Navigation("Discount");
-
                     b.Navigation("Price");
+
+                    b.Navigation("RequestedDiscount");
+
+                    b.Navigation("ResultDiscount");
                 });
 
             modelBuilder.Entity("Shop.Domain.Entities.OrderProduct", b =>

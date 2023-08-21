@@ -13,7 +13,8 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .ValueGeneratedOnAdd();
 
         builder.OwnsOne(order => order.Price, PriceConfiguration.Configure);
-        builder.OwnsOne(order => order.Discount, DiscountConfiguration.Configure);
+        builder.OwnsOne(order => order.RequestedDiscount, DiscountConfiguration.Configure);
+        builder.OwnsOne(order => order.ResultDiscount, DiscountConfiguration.Configure);
 
         builder.HasOne(order => order.Customer)
             .WithMany(customer => customer.Orders)

@@ -4,5 +4,4 @@ public class Discount
 {
     public decimal Percent { get; set; }
     public decimal Value { get; set; }
-    public decimal Total { get; set; }
 }

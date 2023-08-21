@@ -32,9 +32,10 @@ namespace Shop.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Price_SubTotal = table.Column<decimal>(type: "decimal(14,4)", precision: 14, scale: 4, nullable: true),
                     Price_Total = table.Column<decimal>(type: "decimal(14,4)", precision: 14, scale: 4, nullable: true),
-                    Discount_Percent = table.Column<decimal>(type: "decimal(7,4)", precision: 7, scale: 4, nullable: true),
-                    Discount_Value = table.Column<decimal>(type: "decimal(14,4)", precision: 14, scale: 4, nullable: true),
-                    Discount_Total = table.Column<decimal>(type: "decimal(14,4)", precision: 14, scale: 4, nullable: true),
+                    RequestedDiscount_Percent = table.Column<decimal>(type: "decimal(7,4)", precision: 7, scale: 4, nullable: true),
+                    RequestedDiscount_Value = table.Column<decimal>(type: "decimal(14,4)", precision: 14, scale: 4, nullable: true),
+                    ResultDiscount_Percent = table.Column<decimal>(type: "decimal(7,4)", precision: 7, scale: 4, nullable: true),
+                    ResultDiscount_Value = table.Column<decimal>(type: "decimal(14,4)", precision: 14, scale: 4, nullable: true),
                     CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>

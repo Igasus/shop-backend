@@ -14,8 +14,5 @@ public class DiscountConfiguration
         
         ownedBuilder.Property(discount => discount.Value)
             .HasPrecision(DiscountConventions.ValuePrecision, DiscountConventions.ValueScale);
-        
-        ownedBuilder.Property(discount => discount.Total)
-            .HasPrecision(DiscountConventions.TotalPrecision, DiscountConventions.TotalScale);
     }
 }

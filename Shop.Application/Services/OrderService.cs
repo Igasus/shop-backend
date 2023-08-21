@@ -73,8 +73,10 @@ public class OrderService : IOrderService
             order.Price.SubTotal += orderProduct.Price.Total;
         }
 
-        order.Discount.Total = order.Price.SubTotal * (order.Discount.Percent / 100) + order.Discount.Value;
-        order.Price.Total = Math.Max(0, order.Price.SubTotal - order.Discount.Total);
+        order.ResultDiscount.Value = Math.Min(order.Price.SubTotal,
+            order.Price.SubTotal * (order.RequestedDiscount.Percent / 100) + order.RequestedDiscount.Value);
+        order.ResultDiscount.Percent = 100 * order.RequestedDiscount.Value / order.Price.SubTotal;
+        order.Price.Total = Math.Max(0, order.Price.SubTotal - order.ResultDiscount.Value);
 
         await _orderRepository.Orders.AddAsync(order);
         await _orderRepository.Context.SaveChangesAsync();

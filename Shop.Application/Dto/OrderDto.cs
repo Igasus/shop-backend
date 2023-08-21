@@ -9,9 +9,10 @@ public record OrderDto : EntityDtoBase
     public int Index { get; set; }
     public decimal PriceSubTotal { get; set; }
     public decimal PriceTotal { get; set; }
-    public decimal DiscountPercent { get; set; }
-    public decimal DiscountValue { get; set; }
-    public decimal DiscountTotal { get; set; }
+    public decimal RequestedDiscountPercent { get; set; }
+    public decimal RequestedDiscountValue { get; set; }
+    public decimal ResultDiscountPercent { get; set; }
+    public decimal ResultDiscountValue { get; set; }
 
     public Guid CustomerId { get; set; }
     public IList<OrderProductDto> Products { get; set; }
