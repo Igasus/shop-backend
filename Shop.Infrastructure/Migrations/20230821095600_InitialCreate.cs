@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Shop.Infrastructure.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -31,8 +31,10 @@ namespace Shop.Infrastructure.Migrations
                     Index = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Price_SubTotal = table.Column<decimal>(type: "decimal(14,4)", precision: 14, scale: 4, nullable: true),
-                    Price_Discount = table.Column<decimal>(type: "decimal(14,4)", precision: 14, scale: 4, nullable: true),
                     Price_Total = table.Column<decimal>(type: "decimal(14,4)", precision: 14, scale: 4, nullable: true),
+                    Discount_Percent = table.Column<decimal>(type: "decimal(7,4)", precision: 7, scale: 4, nullable: true),
+                    Discount_Value = table.Column<decimal>(type: "decimal(14,4)", precision: 14, scale: 4, nullable: true),
+                    Discount_Total = table.Column<decimal>(type: "decimal(14,4)", precision: 14, scale: 4, nullable: true),
                     CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -54,7 +56,7 @@ namespace Shop.Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Unit_Quantity = table.Column<decimal>(type: "decimal(10,3)", precision: 10, scale: 3, nullable: true),
                     Unit_Measure = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Price_PerUnit = table.Column<decimal>(type: "decimal(14,4)", precision: 14, scale: 4, nullable: true),
+                    Price_SubTotal = table.Column<decimal>(type: "decimal(14,4)", precision: 14, scale: 4, nullable: true),
                     Price_Total = table.Column<decimal>(type: "decimal(14,4)", precision: 14, scale: 4, nullable: true),
                     OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },

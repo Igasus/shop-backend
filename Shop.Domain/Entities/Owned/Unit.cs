@@ -1,4 +1,4 @@
-namespace Shop.Domain.OwnedData;
+namespace Shop.Domain.Entities.Owned;
 
 public class Unit
 {

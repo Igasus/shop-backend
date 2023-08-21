@@ -4,6 +4,7 @@ using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Shop.Api.Common;
 using Shop.Application.Contracts.Aggregates;
 using Shop.Application.Dto;
 using Shop.Domain.Exceptions;
@@ -43,6 +44,7 @@ public class OrderController : ControllerBase
     /// <exception cref="NotFoundException">Order with specified Id does not exist.</exception>
     [HttpGet("{orderId:guid}")]
     [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponseBody), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetByIdAsync([FromRoute] Guid orderId)
     {
         var order = await _orderAggregate.GetByIdAsync(orderId);
@@ -55,9 +57,10 @@ public class OrderController : ControllerBase
     /// </summary>
     /// <param name="input">Order Input data.</param>
     /// <returns>ActionResult with created Order.</returns>
+    /// <exception cref="NotFoundException">Customer with specified CustomerId does not exist.</exception>
     [HttpPost]
     [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponseBody), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CreateAsync([FromBody] OrderDtoInput input)
     {
         var orderId = await _orderAggregate.CreateAsync(input);

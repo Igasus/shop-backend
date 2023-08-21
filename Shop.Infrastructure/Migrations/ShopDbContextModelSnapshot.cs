@@ -91,14 +91,10 @@ namespace Shop.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Shop.Domain.OwnedData.OrderPrice", "Price", b1 =>
+                    b.OwnsOne("Shop.Domain.Entities.Owned.Price", "Price", b1 =>
                         {
                             b1.Property<Guid>("OrderId")
                                 .HasColumnType("uniqueidentifier");
-
-                            b1.Property<decimal>("Discount")
-                                .HasPrecision(14, 4)
-                                .HasColumnType("decimal(14,4)");
 
                             b1.Property<decimal>("SubTotal")
                                 .HasPrecision(14, 4)
@@ -116,7 +112,34 @@ namespace Shop.Infrastructure.Migrations
                                 .HasForeignKey("OrderId");
                         });
 
+                    b.OwnsOne("Shop.Domain.Entities.Owned.Discount", "Discount", b1 =>
+                        {
+                            b1.Property<Guid>("OrderId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<decimal>("Percent")
+                                .HasPrecision(7, 4)
+                                .HasColumnType("decimal(7,4)");
+
+                            b1.Property<decimal>("Total")
+                                .HasPrecision(14, 4)
+                                .HasColumnType("decimal(14,4)");
+
+                            b1.Property<decimal>("Value")
+                                .HasPrecision(14, 4)
+                                .HasColumnType("decimal(14,4)");
+
+                            b1.HasKey("OrderId");
+
+                            b1.ToTable("Orders");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrderId");
+                        });
+
                     b.Navigation("Customer");
+
+                    b.Navigation("Discount");
 
                     b.Navigation("Price");
                 });
@@ -129,12 +152,12 @@ namespace Shop.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Shop.Domain.OwnedData.OrderProductPrice", "Price", b1 =>
+                    b.OwnsOne("Shop.Domain.Entities.Owned.Price", "Price", b1 =>
                         {
                             b1.Property<Guid>("OrderProductId")
                                 .HasColumnType("uniqueidentifier");
 
-                            b1.Property<decimal>("PerUnit")
+                            b1.Property<decimal>("SubTotal")
                                 .HasPrecision(14, 4)
                                 .HasColumnType("decimal(14,4)");
 
@@ -150,7 +173,7 @@ namespace Shop.Infrastructure.Migrations
                                 .HasForeignKey("OrderProductId");
                         });
 
-                    b.OwnsOne("Shop.Domain.OwnedData.Unit", "Unit", b1 =>
+                    b.OwnsOne("Shop.Domain.Entities.Owned.Unit", "Unit", b1 =>
                         {
                             b1.Property<Guid>("OrderProductId")
                                 .HasColumnType("uniqueidentifier");

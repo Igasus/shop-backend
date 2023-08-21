@@ -2,6 +2,6 @@
 
 public static class UnitConventions
 {
-    public static int QuantityPrecision = 10;
-    public static int QuantityScale = 3;
+    public const int QuantityPrecision = 10;
+    public const int QuantityScale = 3;
 }

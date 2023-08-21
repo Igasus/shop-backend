@@ -17,12 +17,18 @@ public class OrderAggregate : IOrderAggregate
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IOrderDataSource _orderDataSource;
+    private readonly ICustomerDataSource _customerDataSource;
     private readonly IMapper _mapper;
 
-    public OrderAggregate(IOrderRepository orderRepository, IOrderDataSource orderDataSource, IMapper mapper)
+    public OrderAggregate(
+        IOrderRepository orderRepository,
+        IOrderDataSource orderDataSource,
+        ICustomerDataSource customerDataSource,
+        IMapper mapper)
     {
         _orderRepository = orderRepository;
         _orderDataSource = orderDataSource;
+        _customerDataSource = customerDataSource;
         _mapper = mapper;
     }
 
@@ -51,7 +57,24 @@ public class OrderAggregate : IOrderAggregate
 
     public async Task<Guid> CreateAsync(OrderDtoInput input)
     {
+        var customerExist = await _customerDataSource.Customers
+            .AnyAsync(c => c.Id == input.CustomerId);
+        
+        if (!customerExist)
+        {
+            throw new NotFoundException(ErrorMessages.NotFound((Customer c) => c.Id, input.CustomerId));
+        }
+        
         var order = _mapper.Map<Order>(input);
+
+        foreach (var orderProduct in order.Products)
+        {
+            orderProduct.Price.Total = orderProduct.Price.SubTotal * orderProduct.Unit.Quantity;
+            order.Price.SubTotal += orderProduct.Price.Total;
+        }
+
+        order.Discount.Total = order.Price.SubTotal * (order.Discount.Percent / 100) + order.Discount.Value;
+        order.Price.Total = Math.Max(0, order.Price.SubTotal - order.Discount.Total);
 
         await _orderRepository.Orders.AddAsync(order);
         await _orderRepository.Context.SaveChangesAsync();

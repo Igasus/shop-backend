@@ -6,5 +6,8 @@ namespace Shop.Application.Dto;
 public record OrderDtoInput
 {
     public Guid CustomerId { get; set; }
+    public decimal DiscountPercent { get; set; }
+    public decimal DiscountValue { get; set; }
+    
     public IList<OrderProductDtoInput> Products { get; set; }
 }
