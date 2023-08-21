@@ -3,7 +3,7 @@ using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Shop.Application.Contracts.Aggregates;
+using Shop.Application.Contracts.Services;
 using Shop.Application.Dto;
 
 namespace Shop.Api.Controllers;
@@ -13,11 +13,11 @@ namespace Shop.Api.Controllers;
 [Route("api/customers")]
 public class CustomerController : ControllerBase
 {
-    private readonly ICustomerAggregate _customerAggregate;
+    private readonly ICustomerService _customerService;
 
-    public CustomerController(ICustomerAggregate customerAggregate)
+    public CustomerController(ICustomerService customerService)
     {
-        _customerAggregate = customerAggregate;
+        _customerService = customerService;
     }
 
     /// <summary>
@@ -28,7 +28,7 @@ public class CustomerController : ControllerBase
     [ProducesResponseType(typeof(IList<CustomerDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllAsync()
     {
-        var customers = await _customerAggregate.GetAllAsync();
+        var customers = await _customerService.GetAllAsync();
 
         return Ok(customers);
     }
@@ -42,8 +42,8 @@ public class CustomerController : ControllerBase
     [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateAsync([FromBody] CustomerDtoInput input)
     {
-        var customerId = await _customerAggregate.CreateAsync(input);
-        var customer = await _customerAggregate.GetByIdAsync(customerId);
+        var customerId = await _customerService.CreateAsync(input);
+        var customer = await _customerService.GetByIdAsync(customerId);
 
         return Ok(customer);
     }

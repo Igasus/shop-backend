@@ -4,23 +4,23 @@ using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using Shop.Application.Contracts.Aggregates;
 using Shop.Application.Contracts.DataSources;
 using Shop.Application.Contracts.Repositories;
+using Shop.Application.Contracts.Services;
 using Shop.Application.Dto;
 using Shop.Domain.Entities;
 using Shop.Domain.Exceptions;
 
-namespace Shop.Application.Aggregates;
+namespace Shop.Application.Services;
 
-public class OrderAggregate : IOrderAggregate
+public class OrderService : IOrderService
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IOrderDataSource _orderDataSource;
     private readonly ICustomerDataSource _customerDataSource;
     private readonly IMapper _mapper;
 
-    public OrderAggregate(
+    public OrderService(
         IOrderRepository orderRepository,
         IOrderDataSource orderDataSource,
         ICustomerDataSource customerDataSource,

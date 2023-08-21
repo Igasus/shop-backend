@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Api.Common;
-using Shop.Application.Contracts.Aggregates;
+using Shop.Application.Contracts.Services;
 using Shop.Application.Dto;
 using Shop.Domain.Exceptions;
 
@@ -16,11 +16,11 @@ namespace Shop.Api.Controllers;
 [Route("api/orders")]
 public class OrderController : ControllerBase
 {
-    private readonly IOrderAggregate _orderAggregate;
+    private readonly IOrderService _orderService;
 
-    public OrderController(IOrderAggregate orderAggregate)
+    public OrderController(IOrderService orderService)
     {
-        _orderAggregate = orderAggregate;
+        _orderService = orderService;
     }
 
     /// <summary>
@@ -31,7 +31,7 @@ public class OrderController : ControllerBase
     [ProducesResponseType(typeof(IList<OrderDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllAsync()
     {
-        var orders = await _orderAggregate.GetAllAsync();
+        var orders = await _orderService.GetAllAsync();
 
         return Ok(orders);
     }
@@ -47,7 +47,7 @@ public class OrderController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponseBody), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetByIdAsync([FromRoute] Guid orderId)
     {
-        var order = await _orderAggregate.GetByIdAsync(orderId);
+        var order = await _orderService.GetByIdAsync(orderId);
 
         return Ok(order);
     }
@@ -63,8 +63,8 @@ public class OrderController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponseBody), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CreateAsync([FromBody] OrderDtoInput input)
     {
-        var orderId = await _orderAggregate.CreateAsync(input);
-        var order = await _orderAggregate.GetByIdAsync(orderId);
+        var orderId = await _orderService.CreateAsync(input);
+        var order = await _orderService.GetByIdAsync(orderId);
 
         return Ok(order);
     }

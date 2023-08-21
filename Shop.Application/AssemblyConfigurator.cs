@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
-using Shop.Application.Aggregates;
-using Shop.Application.Contracts.Aggregates;
+using Shop.Application.Contracts.Services;
+using Shop.Application.Services;
 
 namespace Shop.Application;
 
@@ -8,8 +8,8 @@ public static class AssemblyConfigurator
 {
     public static IServiceCollection ConfigureApplicationServices(this IServiceCollection services)
     {
-        services.AddTransient<ICustomerAggregate, CustomerAggregate>();
-        services.AddTransient<IOrderAggregate, OrderAggregate>();
+        services.AddTransient<ICustomerService, CustomerService>();
+        services.AddTransient<IOrderService, OrderService>();
 
         services.AddAutoMapper(typeof(AssemblyConfigurator).Assembly);
         
