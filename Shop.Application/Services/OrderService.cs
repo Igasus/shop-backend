@@ -9,6 +9,7 @@ using Shop.Application.Contracts.Messaging;
 using Shop.Application.Contracts.Repositories;
 using Shop.Application.Contracts.Services;
 using Shop.Application.Dto;
+using Shop.Application.Dto.Messaging;
 using Shop.Domain.Entities;
 using Shop.Domain.Exceptions;
 
@@ -91,7 +92,7 @@ public class OrderService : IOrderService
     public async Task PublishOrderCreatedMessage(Guid orderId)
     {
         var order = await _orderDataSource.Orders
-            .ProjectTo<OrderDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<OrderDtoMessage>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(o => o.Id == orderId);
 
         if (order is null)

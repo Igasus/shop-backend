@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Shop.Application.Dto.Messaging;
 using Shop.Domain.Entities;
 using Shop.Domain.Entities.Owned;
 
@@ -29,5 +30,13 @@ public class OrderMappingProfile : Profile
                 opt.MapFrom(entity => entity.ResultDiscount.Percent))
             .ForMember(dto => dto.ResultDiscountValue, opt =>
                 opt.MapFrom(entity => entity.ResultDiscount.Value));
+
+        CreateMap<Order, OrderDtoMessage>()
+            .ForMember(dto => dto.PriceSubTotal, opt =>
+                opt.MapFrom(entity => entity.Price.SubTotal))
+            .ForMember(dto => dto.DiscountTotal, opt =>
+                opt.MapFrom(entity => entity.ResultDiscount.Value))
+            .ForMember(dto => dto.PriceTotal, opt =>
+                opt.MapFrom(entity => entity.Price.Total));
     }
 }
