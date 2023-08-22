@@ -9,6 +9,6 @@ public class AzureOptions
     public class ServiceBusOptions
     {
         public string ConnectionString { get; set; }
-        public string QueueName { get; set; }
+        public string QueueOrTopicName { get; set; }
     }
 }

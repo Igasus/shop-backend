@@ -13,7 +13,7 @@ public class AzureServiceBusMessagePublisher : IMessagePublisher
 
     public AzureServiceBusMessagePublisher(ServiceBusClient serviceBusClient, IOptions<AzureOptions> options)
     {
-        _serviceBusSender = serviceBusClient.CreateSender(options.Value.ServiceBus.QueueName);
+        _serviceBusSender = serviceBusClient.CreateSender(options.Value.ServiceBus.QueueOrTopicName);
     }
 
     public async Task PublishAsync<T>(T obj)
