@@ -12,4 +12,9 @@ public class OrderProduct : EntityBase
     
     public Guid OrderId { get; set; }
     public virtual Order Order { get; set; }
+
+    public void ActualizeTotalPrice()
+    {
+        Price.Total = Price.SubTotal * Unit.Quantity;
+    }
 }

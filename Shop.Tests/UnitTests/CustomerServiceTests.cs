@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Shop.Application.Dto;
 using Shop.Application.Services;
 using Shop.Domain.Entities;
-using Shop.Domain.Entities.Owned;
 using Shop.Domain.Exceptions;
 using Shop.Infrastructure;
 using Shop.Infrastructure.DataSources;
 using Shop.Infrastructure.Repositories;
+using Shop.Tests.DataGenerators;
 using Xunit;
 
 namespace Shop.Tests.UnitTests;
@@ -33,7 +34,7 @@ public class CustomerServiceTests : IClassFixture<DbContextFixture>, IClassFixtu
     #region GetAllAsync
 
     [Fact]
-    public async Task GetAllAsync_ReturnEmptyList()
+    public async Task GetAllAsync_NoCustomers_ReturnEmptyList()
     {
         try
         {
@@ -61,12 +62,7 @@ public class CustomerServiceTests : IClassFixture<DbContextFixture>, IClassFixtu
             var customers = new List<Customer>();
             for (var customerIndex = 0; customerIndex < customersCount; customerIndex++)
             {
-                customers.Add(new Customer
-                {
-                    FullName = $"FullName-{customerIndex}",
-                    PhoneNumber = customerIndex.ToString(),
-                    Email = $"{customerIndex}@mail.com"
-                });
+                customers.Add(TestEntityGenerator.GenerateCustomer(customerIndex.ToString()));
             }
 
             await _dbContext.Customers.AddRangeAsync(customers);
@@ -79,9 +75,12 @@ public class CustomerServiceTests : IClassFixture<DbContextFixture>, IClassFixtu
             Assert.Equal(customersCount, getAllCustomersResult.Count);
             foreach (var expectedCustomer in customers)
             {
-                Assert.Contains(getAllCustomersResult, c => c.FullName == expectedCustomer.FullName);
-                Assert.Contains(getAllCustomersResult, c => c.PhoneNumber == expectedCustomer.PhoneNumber);
-                Assert.Contains(getAllCustomersResult, c => c.Email == expectedCustomer.Email);
+                var actualCustomer = getAllCustomersResult
+                    .FirstOrDefault(customer => customer.Id == expectedCustomer.Id);
+                Assert.NotNull(actualCustomer);
+                Assert.Equal(expectedCustomer.FullName, actualCustomer.FullName);
+                Assert.Equal(expectedCustomer.PhoneNumber, actualCustomer.PhoneNumber);
+                Assert.Equal(expectedCustomer.Email, actualCustomer.Email);
             }
         }
         finally
@@ -101,16 +100,10 @@ public class CustomerServiceTests : IClassFixture<DbContextFixture>, IClassFixtu
         try
         {
             // Arrange
-            var expectedCustomer = new Customer
-            {
-                FullName = $"FullName-{Guid.NewGuid().ToString()}",
-                PhoneNumber = Guid.NewGuid().ToString(),
-                Email = $"{Guid.NewGuid().ToString()}@mail.com"
-            };
+            var expectedCustomer = TestEntityGenerator.GenerateCustomer(Guid.NewGuid().ToString());
 
-            var entityEntry = await _dbContext.Customers.AddAsync(expectedCustomer);
+            await _dbContext.Customers.AddAsync(expectedCustomer);
             await _dbContext.SaveChangesAsync();
-            entityEntry.State = EntityState.Detached;
             
             // Act
             var actualCustomer = await _customerService.GetByIdAsync(expectedCustomer.Id);
@@ -141,38 +134,15 @@ public class CustomerServiceTests : IClassFixture<DbContextFixture>, IClassFixtu
             var expectedOrders = new List<Order>();
             for (var orderIndex = 0; orderIndex < ordersCount; orderIndex++)
             {
-                expectedOrders.Add(new Order
-                {
-                    Price = new Price(),
-                    RequestedDiscount = new Discount(),
-                    ResultDiscount = new Discount(),
-                    Products = new List<OrderProduct>
-                    {
-                        new()
-                        {
-                            Name = orderIndex.ToString(),
-                            Unit = new Unit
-                            {
-                                Quantity = 1,
-                                Measure = "pt"
-                            },
-                            Price = new Price()
-                        }
-                    }
-                });
-            }
-            
-            var expectedCustomer = new Customer
-            {
-                FullName = $"FullName-{Guid.NewGuid().ToString()}",
-                PhoneNumber = Guid.NewGuid().ToString(),
-                Email = $"{Guid.NewGuid().ToString()}@mail.com",
-                Orders = expectedOrders
-            };
+                var expectedOrderProducts = new List<OrderProduct>
+                    { TestEntityGenerator.GenerateOrderProduct(orderIndex.ToString()) };
 
-            var entityEntry = await _dbContext.Customers.AddAsync(expectedCustomer);
+                expectedOrders.Add(TestEntityGenerator.GenerateOrder(products: expectedOrderProducts));
+            }
+            var expectedCustomer = TestEntityGenerator.GenerateCustomer(Guid.NewGuid().ToString(), expectedOrders);
+
+            await _dbContext.Customers.AddAsync(expectedCustomer);
             await _dbContext.SaveChangesAsync();
-            entityEntry.State = EntityState.Detached;
             
             // Act
             var actualCustomer = await _customerService.GetByIdAsync(expectedCustomer.Id);
@@ -225,11 +195,12 @@ public class CustomerServiceTests : IClassFixture<DbContextFixture>, IClassFixtu
         try
         {
             // Arrange
+            var expectedCustomer = TestEntityGenerator.GenerateCustomer(Guid.NewGuid().ToString());
             var createCustomerInput = new CustomerDtoInput
             {
-                FullName = $"FullName-{Guid.NewGuid().ToString()}",
-                PhoneNumber = Guid.NewGuid().ToString(),
-                Email = $"{Guid.NewGuid().ToString()}@mail.com"
+                FullName = expectedCustomer.FullName,
+                PhoneNumber = expectedCustomer.PhoneNumber,
+                Email = expectedCustomer.Email
             };
             
             // Act

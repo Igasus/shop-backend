@@ -71,17 +71,7 @@ public class OrderService : IOrderService
         }
         
         var order = _mapper.Map<Order>(input);
-
-        foreach (var orderProduct in order.Products)
-        {
-            orderProduct.Price.Total = orderProduct.Price.SubTotal * orderProduct.Unit.Quantity;
-            order.Price.SubTotal += orderProduct.Price.Total;
-        }
-
-        order.ResultDiscount.Value = Math.Min(order.Price.SubTotal,
-            order.Price.SubTotal * (order.RequestedDiscount.Percent / 100) + order.RequestedDiscount.Value);
-        order.ResultDiscount.Percent = 100 * order.ResultDiscount.Value / order.Price.SubTotal;
-        order.Price.Total = Math.Max(0, order.Price.SubTotal - order.ResultDiscount.Value);
+        order.ActualizeCalculatedData();
 
         await _orderRepository.Orders.AddAsync(order);
         await _orderRepository.Context.SaveChangesAsync();
