@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using Shop.Application.Dto.Abstractions;
+using Shop.Domain.Enums;
 
 namespace Shop.Application.Dto;
 
 public record OrderDto : EntityDtoBase
 {
     public int Index { get; set; }
+    public OrderStatus Status { get; set; }
     public decimal PriceSubTotal { get; set; }
     public decimal PriceTotal { get; set; }
     public decimal RequestedDiscountPercent { get; set; }

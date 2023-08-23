@@ -11,6 +11,7 @@ using Shop.Application.Contracts.Services;
 using Shop.Application.Dto;
 using Shop.Application.Dto.Messaging;
 using Shop.Domain.Entities;
+using Shop.Domain.Enums;
 using Shop.Domain.Exceptions;
 
 namespace Shop.Application.Services;
@@ -91,5 +92,20 @@ public class OrderService : IOrderService
         }
 
         await _messagePublisher.PublishAsync(order);
+    }
+
+    public async Task UpdateOrderStatusAsync(Guid orderId, OrderStatus status)
+    {
+        var order = await _orderRepository.Orders
+            .FirstOrDefaultAsync(o => o.Id == orderId);
+
+        if (order is null)
+        {
+            throw new NotFoundException(ErrorMessages.NotFound((Order o) => o.Id, orderId));
+        }
+
+        order.Status = status;
+
+        await _orderRepository.Context.SaveChangesAsync();
     }
 }

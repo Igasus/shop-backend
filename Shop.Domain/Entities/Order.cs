@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Shop.Domain.Abstractions;
 using Shop.Domain.Entities.Owned;
+using Shop.Domain.Enums;
 
 namespace Shop.Domain.Entities;
 
@@ -10,6 +11,7 @@ public class Order : EntityBase
 {
     public int Index { get; set; }
     public Price Price { get; set; } = new();
+    public OrderStatus Status { get; set; } = OrderStatus.Pending;
     public Discount RequestedDiscount { get; set; } = new();
     public Discount ResultDiscount { get; set; } = new();
     

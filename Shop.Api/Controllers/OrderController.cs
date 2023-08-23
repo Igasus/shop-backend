@@ -57,7 +57,7 @@ public class OrderController : ControllerBase
     /// </summary>
     /// <param name="input">Order Input data.</param>
     /// <returns>ActionResult with created Order.</returns>
-    /// <exception cref="NotFoundException">Customer with specified CustomerId does not exist.</exception>
+    /// <exception cref="NotFoundException">Customer with specified Id does not exist.</exception>
     [HttpPost]
     [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseBody), StatusCodes.Status404NotFound)]
@@ -67,6 +67,24 @@ public class OrderController : ControllerBase
         var order = await _orderService.GetByIdAsync(orderId);
 
         await _orderService.PublishOrderCreatedMessageAsync(orderId);
+
+        return Ok(order);
+    }
+
+    /// <summary>
+    /// Update Order Status.
+    /// </summary>
+    /// <param name="orderId">Id of Order to update.</param>
+    /// <param name="input">Input object with data to set.</param>
+    /// <returns>ActionResult with updated Order.</returns>
+    /// <exception cref="NotFoundException">Order with specified Id does not exist.</exception>
+    [HttpPatch("{orderId:guid}")]
+    [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponseBody), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> PatchAsync([FromRoute] Guid orderId, [FromBody] OrderDtoInputPatch input)
+    {
+        await _orderService.UpdateOrderStatusAsync(orderId, input.Status);
+        var order = await _orderService.GetByIdAsync(orderId);
 
         return Ok(order);
     }

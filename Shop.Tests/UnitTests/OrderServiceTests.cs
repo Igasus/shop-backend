@@ -10,6 +10,7 @@ using Shop.Application.Dto.Messaging;
 using Shop.Application.Services;
 using Shop.Domain.Entities;
 using Shop.Domain.Entities.Owned;
+using Shop.Domain.Enums;
 using Shop.Domain.Exceptions;
 using Shop.Infrastructure;
 using Shop.Infrastructure.DataSources;
@@ -326,6 +327,69 @@ public class OrderServiceTests : IClassFixture<DbContextFixture>, IClassFixture<
             // Act, Assert
             await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _orderService.PublishOrderCreatedMessageAsync(incorrectId));
+        }
+        finally
+        {
+            // Cleanup
+            await _dbContext.Database.EnsureDeletedAsync();
+        }
+    }
+
+    #endregion
+
+    #region UpdateOrderStatusAsync
+
+    [Theory]
+    [InlineData(OrderStatus.Pending, OrderStatus.Active)]
+    [InlineData(OrderStatus.Pending, OrderStatus.Done)]
+    [InlineData(OrderStatus.Active, OrderStatus.Pending)]
+    [InlineData(OrderStatus.Active, OrderStatus.Done)]
+    [InlineData(OrderStatus.Done, OrderStatus.Pending)]
+    [InlineData(OrderStatus.Done, OrderStatus.Active)]
+    public async Task UpdateOrderStatusAsync_CorrectInput_OrderUpdated(
+        OrderStatus statusBeforeUpdate,
+        OrderStatus statusAfterUpdate)
+    {
+        try
+        {
+            // Arrange
+            var expectedOrder = TestEntityGenerator.GenerateOrder();
+            expectedOrder.Status = statusBeforeUpdate;
+            var customer = TestEntityGenerator.GenerateCustomer(
+                Guid.NewGuid().ToString(),
+                new List<Order> { expectedOrder });
+
+            var entityEntry = await _dbContext.Customers.AddAsync(customer);
+            await _dbContext.SaveChangesAsync();
+            entityEntry.State = EntityState.Detached;
+            
+            // Act
+            await _orderService.UpdateOrderStatusAsync(expectedOrder.Id, statusAfterUpdate);
+            
+            // Assert
+            var actualOrder = await _dbContext.Orders
+                .FirstOrDefaultAsync(order => order.Id == expectedOrder.Id);
+            Assert.NotNull(actualOrder);
+            Assert.Equal(statusAfterUpdate, actualOrder.Status);
+        }
+        finally
+        {
+            // Cleanup
+            await _dbContext.Database.EnsureDeletedAsync();
+        }
+    }
+
+    [Fact]
+    public async Task UpdateOrderStatusAsync_IncorrectId_ThrowNotFound()
+    {
+        try
+        {
+            // Arrange
+            var incorrectId = Guid.NewGuid();
+
+            // Act, Assert
+            await Assert.ThrowsAsync<NotFoundException>(async () =>
+                await _orderService.UpdateOrderStatusAsync(incorrectId, OrderStatus.Done));
         }
         finally
         {
