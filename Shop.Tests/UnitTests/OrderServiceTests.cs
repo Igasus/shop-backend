@@ -6,8 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Shop.Application.Contracts.Messaging;
 using Shop.Application.Dto;
+using Shop.Application.Dto.Messaging;
 using Shop.Application.Services;
 using Shop.Domain.Entities;
+using Shop.Domain.Entities.Owned;
 using Shop.Domain.Exceptions;
 using Shop.Infrastructure;
 using Shop.Infrastructure.DataSources;
@@ -25,6 +27,8 @@ public class OrderServiceTests : IClassFixture<DbContextFixture>, IClassFixture<
 {
     private readonly ShopDbContext _dbContext;
     private readonly OrderService _orderService;
+
+    private OrderDtoMessage LastSentMessage { get; set; }
     
     public OrderServiceTests(DbContextFixture dbContextFixture, MapperFixture mapperFixture)
     {
@@ -39,11 +43,17 @@ public class OrderServiceTests : IClassFixture<DbContextFixture>, IClassFixture<
         var messagePublisherMock = new Mock<IMessagePublisher>();
         messagePublisherMock
             .Setup(publisher => publisher.PublishAsync(It.IsAny<It.IsAnyType>()))
-            .Returns(Task.CompletedTask);
+            .Returns((Func<OrderDtoMessage, Task>)MessagePublisherMock_PublishAsync_Order);
         var messagePublisher = messagePublisherMock.Object;
 
         _orderService =
             new OrderService(orderRepository, orderDataSource, customerDataSource, mapper, messagePublisher);
+    }
+    
+    private Task MessagePublisherMock_PublishAsync_Order(OrderDtoMessage message)
+    {
+        LastSentMessage = message;
+        return Task.CompletedTask;
     }
 
     #region GetAllAsync
@@ -128,8 +138,11 @@ public class OrderServiceTests : IClassFixture<DbContextFixture>, IClassFixture<
                 expectedOrderProductList.Add(TestEntityGenerator.GenerateOrderProduct(orderProductIndex.ToString()));
             }
             var expectedOrder = TestEntityGenerator.GenerateOrder(products: expectedOrderProductList);
+            var customer = TestEntityGenerator.GenerateCustomer(
+                Guid.NewGuid().ToString(),
+                new List<Order>{expectedOrder});
 
-            await _dbContext.Orders.AddAsync(expectedOrder);
+            await _dbContext.Customers.AddAsync(customer);
             await _dbContext.SaveChangesAsync();
             
             // Act
@@ -229,6 +242,90 @@ public class OrderServiceTests : IClassFixture<DbContextFixture>, IClassFixture<
                 Assert.Equal(expectedOrderProduct.UnitMeasure, actualOrderProduct.Unit.Measure);
                 Assert.Equal(expectedOrderProduct.PriceSubTotal, actualOrderProduct.Price.SubTotal);
             }
+        }
+        finally
+        {
+            // Cleanup
+            await _dbContext.Database.EnsureDeletedAsync();
+        }
+    }
+
+    #endregion
+
+    #region PublishOrderCreatedMessageAsync
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(3)]
+    public async Task PublishOrderCreatedMessageAsync_CorrectInput_PublishOrderDtoMessage(int orderProductsCount)
+    {
+        try
+        {
+            // Arrange
+            var expectedOrderProductList = new List<OrderProduct>();
+            for (var orderProductIndex = 0; orderProductIndex < orderProductsCount; orderProductIndex++)
+            {
+                expectedOrderProductList.Add(TestEntityGenerator.GenerateOrderProduct(
+                    orderProductIndex.ToString(),
+                    new Unit
+                    {
+                        Quantity = TestValueGenerator.GetRandomDecimal(1, 10),
+                        Measure = Guid.NewGuid().ToString()
+                    }));
+            }
+            var expectedOrder = TestEntityGenerator.GenerateOrder(products: expectedOrderProductList);
+            var customer = TestEntityGenerator.GenerateCustomer(
+                Guid.NewGuid().ToString(),
+                new List<Order>{expectedOrder});
+
+            await _dbContext.Customers.AddAsync(customer);
+            await _dbContext.SaveChangesAsync();
+            
+            // Act
+            await _orderService.PublishOrderCreatedMessageAsync(expectedOrder.Id);
+            
+            // Assert
+            var publishedOrder = LastSentMessage;
+            Assert.NotNull(publishedOrder);
+            Assert.Equal(expectedOrder.Id, publishedOrder.Id);
+            Assert.Equal(expectedOrder.Index, publishedOrder.Index);
+            Assert.Equal(expectedOrder.Price.SubTotal, publishedOrder.PriceSubTotal);
+            Assert.Equal(expectedOrder.ResultDiscount.Value, publishedOrder.DiscountTotal);
+            Assert.Equal(expectedOrder.Price.Total, publishedOrder.PriceTotal);
+            
+            Assert.Equal(expectedOrder.Customer.Id, publishedOrder.Customer.Id);
+            Assert.Equal(expectedOrder.Customer.FullName, publishedOrder.Customer.FullName);
+            Assert.Equal(expectedOrder.Customer.PhoneNumber, publishedOrder.Customer.PhoneNumber);
+            Assert.Equal(expectedOrder.Customer.Email, publishedOrder.Customer.Email);
+            
+            Assert.Equal(orderProductsCount, publishedOrder.Products.Count);
+            foreach (var expectedOrderProduct in expectedOrderProductList)
+            {
+                var publishedOrderProduct = publishedOrder.Products
+                    .FirstOrDefault(orderProduct => orderProduct.Name == expectedOrderProduct.Name);
+                Assert.NotNull(publishedOrderProduct);
+                Assert.Equal(expectedOrderProduct.Unit.Quantity, publishedOrderProduct.UnitQuantity);
+                Assert.Equal(expectedOrderProduct.Unit.Measure, publishedOrderProduct.UnitMeasure);
+            }
+        }
+        finally
+        {
+            // Cleanup
+            await _dbContext.Database.EnsureDeletedAsync();
+        }
+    }
+
+    [Fact]
+    public async Task PublishOrderCreatedMessageAsync_IncorrectId_ThrowNotFound()
+    {
+        try
+        {
+            // Arrange
+            var incorrectId = Guid.NewGuid();
+            
+            // Act, Assert
+            await Assert.ThrowsAsync<NotFoundException>(async () =>
+                await _orderService.PublishOrderCreatedMessageAsync(incorrectId));
         }
         finally
         {

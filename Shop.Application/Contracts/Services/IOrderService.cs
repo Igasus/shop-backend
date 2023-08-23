@@ -10,5 +10,5 @@ public interface IOrderService
     Task<IList<OrderDto>> GetAllAsync();
     Task<OrderDto> GetByIdAsync(Guid id);
     Task<Guid> CreateAsync(OrderDtoInput input);
-    Task PublishOrderCreatedMessage(Guid orderId);
+    Task PublishOrderCreatedMessageAsync(Guid orderId);
 }

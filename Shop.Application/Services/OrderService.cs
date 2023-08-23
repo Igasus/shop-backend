@@ -79,7 +79,7 @@ public class OrderService : IOrderService
         return order.Id;
     }
 
-    public async Task PublishOrderCreatedMessage(Guid orderId)
+    public async Task PublishOrderCreatedMessageAsync(Guid orderId)
     {
         var order = await _orderDataSource.Orders
             .ProjectTo<OrderDtoMessage>(_mapper.ConfigurationProvider)

@@ -66,7 +66,7 @@ public class OrderController : ControllerBase
         var orderId = await _orderService.CreateAsync(input);
         var order = await _orderService.GetByIdAsync(orderId);
 
-        await _orderService.PublishOrderCreatedMessage(orderId);
+        await _orderService.PublishOrderCreatedMessageAsync(orderId);
 
         return Ok(order);
     }
