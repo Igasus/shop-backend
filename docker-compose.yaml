@@ -8,19 +8,27 @@ services:
       - MSSQL_SA_PASSWORD=Initial123!
     ports:
       - "1433:1433"
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      - sql-server-volume:/var/opt/mssql
   api:
     container_name: shop-api
     build:
       context: .
       dockerfile: Dockerfile
-    image: shop-backend
+    image: shop-api
     depends_on:
       - sql-server
     environment:
       - ASPNETCORE_URLS=https://+:3000;http://+:3001
-      - ConnectionStrings:Sql=Server=sql-server,1433;User Id=SA;Password=Initial123!;
-      - Azure:ServiceBus:ConnectionString=Endpoint=sb://shop-service-bus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=eSr9kadZC9AbfqubN4u5Y81kZdl+t4wLr+ASbKhUSEA=
-      - Azure:ServiceBus:QueueOrTopicName=order-created-queue
+      - ConnectionStrings:Sql=server=sql-server,1433;User Id=SA;Password=Initial123!;
+      - ASPNETCORE_ENVIRONMENT=<environment>
+      - Azure:ServiceBus:ConnectionString=<azure_service_bus_connection_string>
+      - Azure:ServiceBus:QueueOrTopicName=<azure_service_bus_queue_or_topic>
     ports:
       - "3000:3000"
       - "3001:3001"
+volumes: 
+  sql-server-volume:
+    driver: local
