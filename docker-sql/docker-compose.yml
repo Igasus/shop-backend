@@ -1,9 +1,0 @@
-services:
-  sqldata:
-    container_name: "shop-sql-server"
-    image: mcr.microsoft.com/azure-sql-edge:latest
-    environment:
-      - SA_PASSWORD=Initial123!
-      - ACCEPT_EULA=Y
-    ports:
-      - "1433:1433"
