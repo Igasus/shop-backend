@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Azure.Messaging.ServiceBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,11 +25,8 @@ public static class AssemblyConfigurator
             optionsBuilder.UseSqlServer(configuration.GetConnectionString("Sql"));
         });
 
-        var azureOptionsSection = configuration.GetSection(AzureOptions.Section);
-        services.Configure<AzureOptions>(options => azureOptionsSection.Bind(options));
-
-        services.AddSingleton(_ =>
-            new ServiceBusClient(azureOptionsSection.Get<AzureOptions>().ServiceBus.ConnectionString));
+        services.Configure<AzureOptions>(options =>
+            configuration.GetSection(AzureOptions.Section).Bind(options));
         
         services.AddTransient<ICustomerRepository, CustomerRepository>();
         services.AddTransient<ICustomerDataSource, CustomerDataSource>();
