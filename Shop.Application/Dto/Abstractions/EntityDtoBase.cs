@@ -1,6 +1,6 @@
 using System;
 
-namespace Shop.Application.Dto;
+namespace Shop.Application.Dto.Abstractions;
 
 public abstract record EntityDtoBase
 {

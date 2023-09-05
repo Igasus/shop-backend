@@ -1,19 +1,64 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
+using Shop.Application.Contracts.DataSources;
+using Shop.Application.Contracts.Repositories;
 using Shop.Application.Contracts.Services;
 using Shop.Application.Dto;
+using Shop.Domain.Entities;
+using Shop.Domain.Exceptions;
 
 namespace Shop.Application.Services;
 
 public class CustomerService : ICustomerService
 {
-    public Task<IList<CustomerDto>> GetAllAsync()
+    private readonly ICustomerRepository _customerRepository;
+    private readonly ICustomerDataSource _customerDataSource;
+    private readonly IMapper _mapper;
+
+    public CustomerService(
+        ICustomerRepository customerRepository,
+        ICustomerDataSource customerDataSource,
+        IMapper mapper)
     {
-        throw new System.NotImplementedException();
+        _customerRepository = customerRepository;
+        _customerDataSource = customerDataSource;
+        _mapper = mapper;
     }
 
-    public Task<CustomerDto> CreateAsync(CustomerDtoInput input)
+    public async Task<IList<CustomerDto>> GetAllAsync()
     {
-        throw new System.NotImplementedException();
+        var customers = await _customerDataSource.Customers
+            .ProjectTo<CustomerDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        return customers;
+    }
+
+    public async Task<CustomerDto> GetByIdAsync(Guid id)
+    {
+        var customer = await _customerDataSource.Customers
+            .ProjectTo<CustomerDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (customer is null)
+        {
+            throw new NotFoundException(ErrorMessages.NotFound((Customer c) => c.Id, id));
+        }
+
+        return customer;
+    }
+
+    public async Task<Guid> CreateAsync(CustomerDtoInput input)
+    {
+        var customer = _mapper.Map<Customer>(input);
+
+        await _customerRepository.Customers.AddAsync(customer);
+        await _customerRepository.Context.SaveChangesAsync();
+
+        return customer.Id;
     }
 }
